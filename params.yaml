@@ -1,0 +1,26 @@
+base:
+    random_seed: 42
+    TARGET_LABEL: 1 
+##########
+download_hf_imdb:
+    hf_name: "imdb"
+    data_dir: data/raw
+##########
+train_reward:
+    reward_model_name: "distilbert-base-cased"
+    attn_implementation: "flash_attention_2"
+    device: "cuda"
+    num_labels: 1
+    reward_model_config_use_cache: False
+    size_of_train_reward_dataset: 50000
+    output_dir: "models"
+    per_device_train_batch_size: 32
+    gradient_accumulation_steps: 1
+    learning_rate: 1.41e-5
+    max_steps: 1200            
+    logging_steps: 50
+    max_length: 512
+    gradient_checkpointing: False
+    peft_config: None
+    
+

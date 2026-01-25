@@ -1,0 +1,18 @@
+stages:
+  download_hf_imdb:
+    cmd: python src/stages/download_hf_imdb.py --config=params.yaml
+    deps:
+    - src/stages/download_hf_imdb.py
+    #- src/pipelines/download_hf_imdb.py
+    params:
+    - download_hf_imdb
+    outs:
+    - data/raw/imdb
+#######
+  train_reward:
+    cmd: python src/stages/train_reward.py --config=params.yaml
+    deps:
+    - src/stages/train_reward.py
+    #- src/pipelines/train_reward.py
+    params:
+    - train_reward
