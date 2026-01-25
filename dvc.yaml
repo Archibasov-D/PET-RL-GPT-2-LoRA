@@ -1,6 +1,7 @@
 stages:
   download_hf_imdb:
-    cmd: python src/stages/download_hf_imdb.py --config=params.yaml
+    #cmd: python src/stages/download_hf_imdb.py --config=params.yaml
+    cmd: export PYTHONPATH=$PYTHONPATH:$(pwd) && python src/stages/download_hf_imdb.py --config=params.yaml
     deps:
     - src/stages/download_hf_imdb.py
     #- src/pipelines/download_hf_imdb.py

@@ -1,0 +1,21 @@
+schema: '2.0'
+stages:
+  download_hf_imdb:
+    cmd: export PYTHONPATH=$PYTHONPATH:$(pwd) && python 
+      src/stages/download_hf_imdb.py --config=params.yaml
+    deps:
+    - path: src/stages/download_hf_imdb.py
+      hash: md5
+      md5: 959aefdfa73f5fa4ea35ca1513a64df3
+      size: 600
+    params:
+      params.yaml:
+        download_hf_imdb:
+          hf_name: imdb
+          data_dir: data/raw
+    outs:
+    - path: data/raw/imdb
+      hash: md5
+      md5: 407a814868d9c4de6e8cc0e9fcd744e3.dir
+      size: 33440443
+      nfiles: 3

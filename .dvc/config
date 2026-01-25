@@ -1,0 +1,6 @@
+[core]
+    no_scm = True
+    remote = hf_remote
+['remote "hf_remote"']
+    url = https://huggingface.co/Daniil-Archibasov/reward_model_imdb
+    custom_auth_header = Authorization: Bearer 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
