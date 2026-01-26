@@ -27,6 +27,7 @@ def train_reward_model(params):
     reward_data = IMDBPairwiseDataset_test(imdb,
                                        accepted_label=params.base.TARGET_LABEL)
     
+    
     # конвертация в приемлимый формат для трейнера
     all_examples = []
     N = params.train_reward.size_of_train_reward_dataset
@@ -51,7 +52,7 @@ def train_reward_model(params):
                                                                       device_map=device,
                                                                       num_labels=params.train_reward.num_labels)
     reward_model.config.use_cache = params.train_reward.reward_model_config_use_cache
-    
+    reward_tokenizer = transformers.AutoTokenizer.from_pretrained(params.train_reward.reward_model_name)
 
     # Применяем патч
     reward_model.forward = patched_forward.__get__(reward_model, 
