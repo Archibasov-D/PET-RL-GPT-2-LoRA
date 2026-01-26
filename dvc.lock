@@ -19,3 +19,10 @@ stages:
       md5: 407a814868d9c4de6e8cc0e9fcd744e3.dir
       size: 33440443
       nfiles: 3
+  install_deps:
+    cmd: pip install -r requirements.txt
+    deps:
+    - path: requirements.txt
+      hash: md5
+      md5: df0a0f76e139b2a3894649bdc9e8841c
+      size: 140

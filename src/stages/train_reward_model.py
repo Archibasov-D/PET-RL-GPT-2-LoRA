@@ -3,7 +3,7 @@ import trl
 import transformers
 from transformers import AutoModelForSequenceClassification
 import datasets
-from datasets import load_from_disk
+from datasets import load_from_disk, Dataset
 from tqdm import tqdm
 import numpy as np
 import random
@@ -22,8 +22,8 @@ def train_reward_model(params):
     torch.manual_seed(params.base.random_seed)
     torch.cuda.manual_seed(params.base.random_seed)
 
-    device = torch.device(params.device)
-    imdb = load_from_disk(params.download_hf_imdb.data_dir)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    imdb = load_from_disk(Path(params.download_hf_imdb.data_dir) / params.download_hf_imdb.hf_name)
     reward_data = IMDBPairwiseDataset_test(imdb,
                                        accepted_label=params.base.TARGET_LABEL)
     

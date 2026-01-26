@@ -10,4 +10,8 @@ pytest
 python-dotenv
 ruff
 scikit-learn
+trl
+transformers 
+datasets 
+peft
 -e .

@@ -36,8 +36,13 @@ class IMDBPairwiseDataset_test(torch.utils.data.Dataset):
                     'rejected':self.rejected_texts[index % len(self.chosen_texts)]}
 
 
-def patched_forward(self, original_forward, *args, **kwargs):
+
+def patched_forward(self, *args, **kwargs):
     """Удаляем неподдерживаемые параметры"""
+    # Удаляем конфликтующие параметры для совместимости
     kwargs.pop("use_cache", None)
     kwargs.pop("cache_position", None)
-    return original_forward(*args, **kwargs)
+    
+    # Вызываем реализацию forward из класса модели,
+    # передавая текущий экземпляр (self)
+    return self.__class__.forward(self, *args, **kwargs)

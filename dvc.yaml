@@ -1,4 +1,8 @@
 stages:
+  install_deps:
+    cmd: pip install -r requirements.txt
+    deps:
+      - requirements.txt
   download_hf_imdb:
     #cmd: python src/stages/download_hf_imdb.py --config=params.yaml
     cmd: export PYTHONPATH=$PYTHONPATH:$(pwd) && python src/stages/download_hf_imdb.py --config=params.yaml
@@ -11,9 +15,9 @@ stages:
     - data/raw/imdb
 #######
   train_reward:
-    cmd: python src/stages/train_reward.py --config=params.yaml
+    cmd: python src/stages/train_reward_model.py --config=params.yaml
     deps:
-    - src/stages/train_reward.py
+    - src/stages/train_reward_model.py
     #- src/pipelines/train_reward.py
     params:
     - train_reward

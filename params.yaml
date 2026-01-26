@@ -8,8 +8,8 @@ download_hf_imdb:
 ##########
 train_reward:
     reward_model_name: "distilbert-base-cased"
-    attn_implementation: "flash_attention_2"
-    device: "cuda"
+    attn_implementation: "sdpa"
+    #device: "cuda"
     num_labels: 1
     reward_model_config_use_cache: False
     size_of_train_reward_dataset: 50000
@@ -22,5 +22,5 @@ train_reward:
     max_length: 512
     gradient_checkpointing: False
     peft_config: None
-    
+
 
