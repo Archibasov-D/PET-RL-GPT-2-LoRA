@@ -80,7 +80,9 @@ def train_reward_model(params):
         max_length= params.train_reward.max_length,
         gradient_checkpointing= params.train_reward.gradient_checkpointing,
         bf16= torch.cuda.is_bf16_supported(),
-        fp16= not torch.cuda.is_bf16_supported()    # fp16 для старых GPU
+        fp16= not torch.cuda.is_bf16_supported(),    # fp16 для старых GPU
+	push_to_hub=params.train_reward.push_to_hub, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
+    	hub_model_id=params.train_reward.hub_model_id, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
     )
 
     reward_tokenizer.model_max_length = params.train_reward.max_length
@@ -90,8 +92,6 @@ def train_reward_model(params):
     args=training_args,
     train_dataset=hf_reward_data,
     peft_config=None,  # будем делать полный fine-tune
-    push_to_hub=params.train_reward.push_to_hub, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
-    hub_model_id=params.train_reward.hub_model_id, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
     processing_class = reward_tokenizer
     )
 
