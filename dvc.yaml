@@ -15,9 +15,12 @@ stages:
     - data/raw/imdb
 #######
   train_reward:
-    cmd: python src/stages/train_reward_model.py --config=params.yaml
+    cmd: export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True" && export PYTHONPATH=$PYTHONPATH:$(pwd) && python src/stages/train_reward_model.py --config=params.yaml
     deps:
     - src/stages/train_reward_model.py
     #- src/pipelines/train_reward.py
     params:
     - train_reward
+    outs:
+    - models/reward_model # НЕ ПРОВЕРЯЛ 
+#######

@@ -17,7 +17,7 @@ class IMDBPairwiseDataset(torch.utils.data.Dataset):
         rejected = self.tokenizer(self.rejected_texts[index % len(self.chosen_texts)], truncation=True)
         return dict(chosen_input_ids=chosen['input_ids'], chosen_attention_mask=chosen['attention_mask'],
                    rejected_input_ids=rejected['input_ids'], rejected_attention_mask=rejected['attention_mask'])
-        
+
 
 class IMDBPairwiseDataset_test(torch.utils.data.Dataset):
     """ A dataset of all possible pairs of chosen and texts in TRL reward training format """
@@ -42,7 +42,7 @@ def patched_forward(self, *args, **kwargs):
     # Удаляем конфликтующие параметры для совместимости
     kwargs.pop("use_cache", None)
     kwargs.pop("cache_position", None)
-    
+
     # Вызываем реализацию forward из класса модели,
     # передавая текущий экземпляр (self)
     return self.__class__.forward(self, *args, **kwargs)

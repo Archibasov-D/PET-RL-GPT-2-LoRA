@@ -12,7 +12,8 @@ from trl import GRPOTrainer, GRPOConfig, RewardTrainer, RewardConfig
 from src.pipelines.train_reward_model import IMDBPairwiseDataset, IMDBPairwiseDataset_test, patched_forward
 from box import ConfigBox
 from src.utils.decorator import parser
-
+import os
+from dotenv import load_ext
 
 
 @parser(prog_name="Train reward model", dscr="Download model and dataset| Create dataset for train | Apply RewardTrainer")
@@ -26,8 +27,10 @@ def train_reward_model(params):
     imdb = load_from_disk(Path(params.download_hf_imdb.data_dir) / params.download_hf_imdb.hf_name)
     reward_data = IMDBPairwiseDataset_test(imdb,
                                        accepted_label=params.base.TARGET_LABEL)
+
     
-    
+    load_dotenv()
+    token = os.getenv("HF_TOKEN") # загрузка токена через venv
     # конвертация в приемлимый формат для трейнера
     all_examples = []
     N = params.train_reward.size_of_train_reward_dataset
@@ -35,7 +38,7 @@ def train_reward_model(params):
     for i in tqdm(pairs):
         example = reward_data[i]
 
-        
+
         if torch.is_tensor(example["chosen"]):
             example = {
                 'chosen': example["chosen'"].tolist(),
@@ -55,7 +58,7 @@ def train_reward_model(params):
     reward_tokenizer = transformers.AutoTokenizer.from_pretrained(params.train_reward.reward_model_name)
 
     # Применяем патч
-    reward_model.forward = patched_forward.__get__(reward_model, 
+    reward_model.forward = patched_forward.__get__(reward_model,
                                                    reward_model.__class__)
     # Используем библиотеку trl в ней есть трейнер аналогичный обычному от HF но для RL
     # Устанавливаем EOS
@@ -72,10 +75,10 @@ def train_reward_model(params):
         per_device_train_batch_size= params.train_reward.per_device_train_batch_size,
         gradient_accumulation_steps= params.train_reward.gradient_accumulation_steps,
         learning_rate= params.train_reward.learning_rate,
-        max_steps= params.train_reward.max_steps,              
+        max_steps= params.train_reward.max_steps,
         logging_steps= params.train_reward.logging_steps,
         max_length= params.train_reward.max_length,
-        gradient_checkpointing= params.train_reward.gradient_checkpointing,  
+        gradient_checkpointing= params.train_reward.gradient_checkpointing,
         bf16= torch.cuda.is_bf16_supported(),
         fp16= not torch.cuda.is_bf16_supported()    # fp16 для старых GPU
     )
@@ -87,12 +90,14 @@ def train_reward_model(params):
     args=training_args,
     train_dataset=hf_reward_data,
     peft_config=None,  # будем делать полный fine-tune
+    push_to_hub=params.train_reward.push_to_hub, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
+    hub_model_id=params.train_reward.hub_model_id, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
     processing_class = reward_tokenizer
     )
 
     trainer.train()
     trainer.save_model()
-    
+
 if __name__ == "__main__":
     train_reward_model()
 
