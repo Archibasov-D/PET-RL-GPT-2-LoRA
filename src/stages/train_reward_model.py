@@ -13,7 +13,7 @@ from src.pipelines.train_reward_model import IMDBPairwiseDataset, IMDBPairwiseDa
 from box import ConfigBox
 from src.utils.decorator import parser
 import os
-from dotenv import load_ext
+from dotenv import load_dotenv
 
 
 @parser(prog_name="Train reward model", dscr="Download model and dataset| Create dataset for train | Apply RewardTrainer")
