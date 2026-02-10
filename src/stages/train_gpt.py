@@ -123,7 +123,10 @@ def train_gpt(params):
         save_steps = params.train_gpt.save_steps,
         max_grad_norm = params.train_gpt.max_grad_norm,
         report_to = params.train_gpt.report_to, 
-        run_name= os.environ["WANDB_RUN_NAME"] 
+        run_name= os.environ["WANDB_RUN_NAME"], 
+        push_to_hub=params.train_gpt.push_to_hub, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
+    	  hub_model_id=params.train_gpt.hub_model_id, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
+
     )
 
     trainer = GRPOTrainer(

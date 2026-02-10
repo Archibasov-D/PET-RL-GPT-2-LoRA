@@ -25,6 +25,8 @@ train_reward:
     gradient_checkpointing: False
     peft_config: None
 train_gpt:
+    push_to_hub: True #  true, если на HF Hub
+    hub_model_id: "Daniil-Archibasov/GPT-2-TRL"
     main_model: "lvwerra/gpt2-imdb" 
     use_safetensors: True 
     force_download: True 
