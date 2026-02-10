@@ -189,3 +189,15 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+# Игнорировать логи Weights & Biases
+
+wandb/
+
+
+
+# Игнорировать временные файлы DVC (они тоже у тебя попали в список!)
+
+.dvc/tmp/
+
+.dvc/cache/
+

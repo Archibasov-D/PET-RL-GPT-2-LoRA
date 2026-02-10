@@ -25,7 +25,7 @@ stages:
     - models/reward_model # НЕ ПРОВЕРЯЛ 
 ######
   train_gpt:
-    cmd:
+    cmd: export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True" && export PYTHONPATH=$PYTHONPATH:$(pwd) && python src/stages/train_gpt.py --config=params.yaml
     deps:
     - src/stages/train_gpt.py
     params:

@@ -6,8 +6,8 @@ stages:
     deps:
     - path: src/stages/download_hf_imdb.py
       hash: md5
-      md5: 959aefdfa73f5fa4ea35ca1513a64df3
-      size: 600
+      md5: 84e2ce7c96b484a650e5cd90a83fc45b
+      size: 592
     params:
       params.yaml:
         download_hf_imdb:

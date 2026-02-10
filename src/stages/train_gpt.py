@@ -18,13 +18,27 @@ import os
 from dotenv import load_dotenv
 from src.utils.folder_management import create_folders
 from src.pipelines.train_reward_model import patched_forward
+from functools import partial
 
 @parser(prog_name="Train gpt model", dscr="Download reward_model and dataset| Create dataset for train gpt | Apply GRPOTrainer")
 def train_gpt(params):
+    np.random.seed(params.base.random_seed)
+    random.seed(params.base.random_seed)
+    torch.manual_seed(params.base.random_seed)
+    torch.cuda.manual_seed(params.base.random_seed)
+    torch.set_float32_matmul_precision('high')
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    load_dotenv()
+    token_hf = os.getenv("HF_TOKEN") # загрузка токена через venv
     # загрузка готовой reward model
     reward_tokenizer = transformers.AutoTokenizer.from_pretrained(params.train_reward.reward_model_name)
-    reward_model = AutoModelForSequenceClassification.from_pretrained(params.train_reward.hub_model_id)
 
+    reward_model = AutoModelForSequenceClassification.from_pretrained(params.train_reward.hub_model_id,
+                                                                      attn_implementation=params.train_reward.attn_implementation,
+                                                                      device_map=device,
+                                                                      num_labels=params.train_reward.num_labels)
     # Применяем патч - ? 
     reward_model.forward = patched_forward.__get__(reward_model,
                                                    reward_model.__class__)
@@ -40,30 +54,29 @@ def train_gpt(params):
 
     ##########################################################################
 
-    np.random.seed(params.base.random_seed)
-    random.seed(params.base.random_seed)
-    torch.manual_seed(params.base.random_seed)
-    torch.cuda.manual_seed(params.base.random_seed)
-    torch.set_float32_matmul_precision('high')
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    imdb = load_from_disk(Path(params.download_hf_imdb.data_dir) / params.download_hf_imdb.hf_name)
-
-
-    imdb_for_rlhf = imdb.filter(lambda row: len(row['text']) > 200, batched=False)
-    imdb_for_rlhf = imdb_for_rlhf.remove_columns(['label'])
-    sample_length = LengthSampler(2, 8)  # use the first 2-8 tokens as query
-
-    imdb_for_rlhf = imdb_for_rlhf.map(select_query_and_tokenize, batched=False)
-    imdb_for_rlhf.set_format(type="torch")
 
 
     main_tokenizer = transformers.AutoTokenizer.from_pretrained(params.train_gpt.main_model)
     main_model = transformers.AutoModelForCausalLM.from_pretrained(params.train_gpt.main_model, 
+                                                                   attn_implementation=params.train_reward.attn_implementation,# НЕ ПРОВЕРЯЛ НО НУЖНО
                                                                    device_map= device, 
                                                                    use_safetensors= params.train_gpt.use_safetensors, 
                                                                    force_download= params.train_gpt.force_download, 
-                                                                   resume_download= params.train_gpt.resume_download)
+                                                                   #resume_download= params.train_gpt.resume_download НЕДАВНО УДАЛИЛИ ЭТОТ АРГУМЕНТ
+                                                                   ) 
+    
+    imdb = load_from_disk(Path(params.download_hf_imdb.data_dir) / params.download_hf_imdb.hf_name)
+
+    sample_length = LengthSampler(2, 8)
+    imdb_for_rlhf = imdb.filter(lambda row: len(row['text']) > 200, batched=False)
+    imdb_for_rlhf = imdb_for_rlhf.remove_columns(['label'])
+    sample_length = LengthSampler(2, 8)  # use the first 2-8 tokens as query
+
+    imdb_for_rlhf = imdb_for_rlhf.map(select_query_and_tokenize, 
+                                      batched=False,
+                                      fn_kwargs={"main_tokenizer": main_tokenizer, "sample_length": sample_length} )
+    imdb_for_rlhf.set_format(type="torch")
+
     peft_config = peft.LoraConfig(
         task_type= peft.TaskType.CAUSAL_LM,
         r= params.train_gpt.lora_r,
@@ -77,9 +90,16 @@ def train_gpt(params):
 
     main_model = peft.get_peft_model(main_model, peft_config, adapter_name='default')
     main_model.print_trainable_parameters()
+
+    reward_fn = partial(
+        compute_reward, 
+        reward_model=reward_model, 
+        reward_tokenizer=reward_tokenizer, 
+        device=device
+    )
+    reward_fn.__name__ = "compute_reward"
     # разбираемся с логинами
-    load_dotenv()
-    token_hf = os.getenv("HF_TOKEN") # загрузка токена через venv
+    
     os.environ["WANDB_API_KEY"] = os.getenv("WANDB_API_KEY")
     wandb.login(key= os.environ["WANDB_API_KEY"])
     os.environ["WANDB_DISABLED"] = "false"
@@ -109,9 +129,11 @@ def train_gpt(params):
     trainer = GRPOTrainer(
         model=main_model,
         args = training_args,
-        reward_funcs=compute_reward,
+        reward_funcs= reward_fn,
         train_dataset=imdb_for_rlhf
     )
     trainer.train()
+
+    wandb.finish()
 if __name__ == "__main__":
     train_gpt()
