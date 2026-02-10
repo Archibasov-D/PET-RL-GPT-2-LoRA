@@ -9,13 +9,13 @@ download_hf_imdb:
 train_reward:
     reward_model_name: "distilbert-base-cased"
     attn_implementation: "sdpa"
-    push_to_hub: True # Поставь true, если хочешь авто-загрузку на HF Hub
+    push_to_hub: True #  true, если на HF Hub
     hub_model_id: "Daniil-Archibasov/reward_model_imdb"
     #device: "cuda"
     num_labels: 1
     reward_model_config_use_cache: False
     size_of_train_reward_dataset: 50000
-    output_dir: "models"
+    output_dir: models/reward_model
     per_device_train_batch_size: 32
     gradient_accumulation_steps: 1
     learning_rate: 1.41e-5
@@ -24,5 +24,26 @@ train_reward:
     max_length: 512
     gradient_checkpointing: False
     peft_config: None
+train_gpt:
+    main_model: "lvwerra/gpt2-imdb" 
+    use_safetensors: True 
+    force_download: True 
+    resume_download: False
+    lora_r: 32
+    lora_alpha: 32
+    lora_dropout: 0.0
+    inference_mode:  False
+    per_device_train_batch_size: 64
+    gradient_accumulation_steps: 1
+    num_generations: 8
+    learning_rate: 1.41e-5
+    logging_steps: 10
+    max_completion_length: 200
+    max_steps: 500
+    save_steps: 250
+    max_grad_norm: 1
+    report_to: "wandb" # Weights & Biases
+    output_dir: models/gpt
+
 
 

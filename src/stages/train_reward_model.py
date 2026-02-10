@@ -14,7 +14,7 @@ from box import ConfigBox
 from src.utils.decorator import parser
 import os
 from dotenv import load_dotenv
-
+from src.utils.folder_management import create_folders
 
 @parser(prog_name="Train reward model", dscr="Download model and dataset| Create dataset for train | Apply RewardTrainer")
 def train_reward_model(params):
@@ -30,7 +30,7 @@ def train_reward_model(params):
 
     
     load_dotenv()
-    token = os.getenv("HF_TOKEN") # загрузка токена через venv
+    token_hf = os.getenv("HF_TOKEN") # загрузка токена через venv
     # конвертация в приемлимый формат для трейнера
     all_examples = []
     N = params.train_reward.size_of_train_reward_dataset
@@ -70,6 +70,8 @@ def train_reward_model(params):
 
     # Конфиг трейнера
 
+    create_folders([Path(params.train_reward.output_dir)]) # Нужно создать папку
+
     training_args = trl.RewardConfig(  # Аналог transformers.TrainingArguments
         output_dir= params.train_reward.output_dir,
         per_device_train_batch_size= params.train_reward.per_device_train_batch_size,
@@ -81,8 +83,8 @@ def train_reward_model(params):
         gradient_checkpointing= params.train_reward.gradient_checkpointing,
         bf16= torch.cuda.is_bf16_supported(),
         fp16= not torch.cuda.is_bf16_supported(),    # fp16 для старых GPU
-	push_to_hub=params.train_reward.push_to_hub, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
-    	hub_model_id=params.train_reward.hub_model_id, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
+	      push_to_hub=params.train_reward.push_to_hub, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
+    	  hub_model_id=params.train_reward.hub_model_id, #Чтобы залить на HF НЕ ПРОВЕРЯЛ 
     )
 
     reward_tokenizer.model_max_length = params.train_reward.max_length
@@ -100,4 +102,3 @@ def train_reward_model(params):
 
 if __name__ == "__main__":
     train_reward_model()
-

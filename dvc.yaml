@@ -23,4 +23,12 @@ stages:
     - train_reward
     outs:
     - models/reward_model # НЕ ПРОВЕРЯЛ 
-#######
+######
+  train_gpt:
+    cmd:
+    deps:
+    - src/stages/train_gpt.py
+    params:
+    - train_gpt
+    outs:
+    - models/gpt
