@@ -37,11 +37,11 @@ train_gpt:
     inference_mode:  False
     per_device_train_batch_size: 64
     gradient_accumulation_steps: 1
-    num_generations: 8
+    num_generations: 16
     learning_rate: 1.41e-5
     logging_steps: 10
-    max_completion_length: 200
-    max_steps: 500
+    max_completion_length: 256
+    max_steps: 600
     save_steps: 250
     max_grad_norm: 1
     report_to: "wandb" # Weights & Biases
