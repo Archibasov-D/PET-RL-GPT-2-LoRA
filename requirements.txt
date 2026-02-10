@@ -5,13 +5,17 @@ mkdocs
 notebook
 numpy
 pandas
+trl==0.27.2
+transformers==5.0.0
+torch==2.9.0+cu126
+datasets==4.0.0
+tokenizers==0.22.2
+python-dotenv
+dvc
+python-box
 pip
 pytest
-python-dotenv
 ruff
 scikit-learn
-trl
-transformers 
-datasets 
 peft
 -e .

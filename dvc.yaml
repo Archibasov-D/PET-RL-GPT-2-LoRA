@@ -1,26 +1,29 @@
 stages:
   install_deps:
-    cmd: pip install -r requirements.txt
+    cmd: pip install -r requirements.txt && touch .deps_installed
     deps:
       - requirements.txt
+    outs:
+      - .deps_installed:
+          cache: false # не нужно хранить этот пустой файл в облаке DVC
+
   download_hf_imdb:
-    #cmd: python src/stages/download_hf_imdb.py --config=params.yaml
     cmd: export PYTHONPATH=$PYTHONPATH:$(pwd) && python src/stages/download_hf_imdb.py --config=params.yaml
     deps:
-    - src/stages/download_hf_imdb.py
-    #- src/pipelines/download_hf_imdb.py
+      - .deps_installed # ТЕПЕРЬ ЗАВИСИТ ОТ УСТАНОВКИ
+      - src/stages/download_hf_imdb.py
     params:
-    - download_hf_imdb
+      - download_hf_imdb
     outs:
-    - data/raw/imdb
-#######
+      - data/raw/imdb
+
   train_reward:
-    cmd: export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True" && export PYTHONPATH=$PYTHONPATH:$(pwd) && python src/stages/train_reward_model.py --config=params.yaml
+    cmd: export PYTORCH_ALLOC_CONF="expandable_segments:True" && export PYTHONPATH=$PYTHONPATH:$(pwd) && python src/stages/train_reward_model.py --config=params.yaml
     deps:
-    - src/stages/train_reward_model.py
-    #- src/pipelines/train_reward.py
+      - .deps_installed # ТЕПЕРЬ ЗАВИСИТ ОТ УСТАНОВКИ
+      - data/raw/imdb    # Зависит от данных из предыдущего шага
+      - src/stages/train_reward_model.py
     params:
-    - train_reward
+      - train_reward
     outs:
-    - models/reward_model # НЕ ПРОВЕРЯЛ 
-#######
+      - models/reward_model

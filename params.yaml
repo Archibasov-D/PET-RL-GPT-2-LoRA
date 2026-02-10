@@ -24,5 +24,5 @@ train_reward:
     max_length: 512
     gradient_checkpointing: False
     peft_config: None
-
+    output_dir: models/reward_model
 
